@@ -15,7 +15,6 @@
             overflow: hidden;
             background-color: #000;
         }
-
         #video-container {
             position: fixed;
             top: 0;
@@ -26,7 +25,6 @@
             justify-content: center;
             align-items: center;
         }
-
         video {
             width: 100%;
             height: 100%;
@@ -42,9 +40,14 @@
     </div>
 
     <script>
+        // Parsea parámetros de la URL
         const params = new URLSearchParams(window.location.search);
-        const videoUrl = params.get('video');
-        const posterUrl = params.get('poster');
+        // Valores por defecto
+        const defaultVideo = 'https://www.googleapis.com/drive/v3/files/1iMzhbSOScFqQlwpYj3cVCkeu7DWPn6Q0?alt=media&key=AIzaSyAIpSmdpo48g_EK9kQdcuDKEYJtyqNEGAU';
+        const defaultPoster = '';
+        // Usa parámetros o valores por defecto
+        const videoUrl = params.get('video') || defaultVideo;
+        const posterUrl = params.get('poster') || defaultPoster;
 
         if (videoUrl) {
             // 1) Asignar la fuente (y póster) antes de inicializar Fluid Player
@@ -53,7 +56,6 @@
             if (posterUrl) {
                 videoEl.setAttribute('poster', posterUrl);
             }
-
             // 2) Inicializar Fluid Player con la configuración de anuncios
             fluidPlayer('video-player', {
                 layoutControls: {
