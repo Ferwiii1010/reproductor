@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -45,38 +44,38 @@
     <script>
         const params = new URLSearchParams(window.location.search);
         const videoUrl = params.get('video');
+        const posterUrl = params.get('poster');
 
         if (videoUrl) {
-            const player = fluidPlayer("video-player", {
+            // 1) Asignar la fuente (y póster) antes de inicializar Fluid Player
+            const videoEl = document.getElementById('video-player');
+            videoEl.setAttribute('src', videoUrl);
+            if (posterUrl) {
+                videoEl.setAttribute('poster', posterUrl);
+            }
+
+            // 2) Inicializar Fluid Player con la configuración de anuncios
+            fluidPlayer('video-player', {
                 layoutControls: {
-                    primaryColor: "#FF6600",
+                    primaryColor: '#FF6600',
                     playButtonShowing: true,
                     autoPlay: false,
                     mute: false,
                     allowTheatre: true,
-                    controlBar: {
-                        autoHide: true
-                    }
+                    controlBar: { autoHide: true }
                 },
                 vastOptions: {
                     adList: [
                         {
-                            roll: "preRoll",
-                            vastTag: "https://thusizulu.com/d.maFqzwdDGyNkvEZrG/UO/Re/md9YuiZMUplokQPVTwYox/NczUM_3LMpzaANtCN/jdEk3mMazec/ztM/SIZis/aGW/1/pZd/D/0kxF"
+                            roll: 'preRoll',
+                            vastTag: 'https://thusizulu.com/d.maFqzwdDGyNkvEZrG/UO/Re/md9YuiZMUplokQPVTwYox/NczUM_3LMpzaANtCN/jdEk3mMazec/ztM/SIZis/aGW/1/pZd/D/0kxF'
                         }
                     ],
-                    skipButtonCaption: "Saltar en [[seconds]] segundos",
-                    skipButtonClickCaption: "Saltar ahora",
-                    adText: "Publicidad",
-                    adCTAText: "Más información"
+                    skipButtonCaption: 'Saltar en [[seconds]] segundos',
+                    skipButtonClickCaption: 'Saltar ahora',
+                    adText: 'Publicidad',
+                    adCTAText: 'Más información'
                 }
-            });
-
-            document.getElementById("video-player").setAttribute("src", videoUrl);
-
-            // Evento para reanudar el video tras la publicidad
-            player.on('adFinished', function() {
-                document.getElementById("video-player").play();
             });
         } else {
             document.getElementById('video-container').innerHTML = `
