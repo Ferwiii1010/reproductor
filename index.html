@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Iframe</title>
+    <title>Generador de Iframe para Reproductor</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Generador de Iframe para JW Player</h1>
+    <h1>Generador de Iframe para Reproductor</h1>
     <form id="iframe-generator">
         <!-- Selector de servicio -->
         <label for="service">Servicio:</label>
@@ -79,7 +79,8 @@
                 poster: posterUrl
             });
 
-            const iframeSrc = `https://jeison-ramos.github.io/player/player.html?${iframeParams.toString()}`;
+            // URL de GitHub Pages de tu repositorio reproductor
+            const iframeSrc = `https://ferwiii1010.github.io/reproductor/player.html?${iframeParams.toString()}`;
 
             document.getElementById('iframe-preview').innerHTML = `
                 <h2>Iframe Generado:</h2>
