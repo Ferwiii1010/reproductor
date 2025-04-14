@@ -3,55 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reproductor Fluid Player con Publicidad VAST</title>
+    <title>Reproductor Fluid Player - Test Directo</title>
     <link rel="stylesheet" href="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.css">
     <script src="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js"></script>
     <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background-color: #000;
-        }
-
-        #video-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000; }
+        #video-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
+        video { width: 100%; height: 100%; object-fit: cover; }
     </style>
 </head>
 <body>
     <div id="video-container">
         <video id="video-player" playsinline controls>
-            <!-- The source will be set dynamically -->
             Tu navegador no soporta el elemento de video.
         </video>
     </div>
 
     <script>
-        console.log("Player script started");
+        console.log("Player script started (Direct Play Test)");
         const params = new URLSearchParams(window.location.search);
-        const videoUrl = params.get('video'); 
-        
+        const videoUrl = params.get('video');
+
         console.log("Received video URL param:", videoUrl);
 
         if (videoUrl) {
             const videoElement = document.getElementById("video-player");
-            
             videoElement.setAttribute("src", videoUrl);
             console.log("Video source set on element:", videoUrl);
 
@@ -59,55 +35,31 @@
                 layoutControls: {
                     primaryColor: "#FF6600",
                     playButtonShowing: true,
-                    autoPlay: false, // Keep autoplay false, trigger play manually
-                    mute: false,
+                    autoPlay: true, // Attempt to autoplay directly
+                    mute: false, 
                     allowTheatre: true,
                     controlBar: {
                         autoHide: true
                     }
-                },
-                vastOptions: {
-                    adList: [
-                        {
-                            roll: "preRoll",
-                            vastTag: "https://thusizulu.com/d.maFqzwdDGyNkvEZrG/UO/Re/md9YuiZMUplokQPVTwYox/NczUM_3LMpzaANtCN/jdEk3mMazec/ztM/SIZis/aGW/1/pZd/D/0kxF"
-                        }
-                    ],
-                    skipButtonCaption: "Saltar en [[seconds]] segundos",
-                    skipButtonClickCaption: "Saltar ahora",
-                    adText: "Publicidad",
-                    adCTAText: "Más información"
                 }
+                // --- VAST options removed for this test ---
             });
-            console.log("Fluid Player initialized");
+            console.log("Fluid Player initialized (No Ads for this test)");
 
-            // Evento para reanudar el video tras la publicidad
-            player.on('adFinished', function() {
-                console.log("Ad finished event triggered. Waiting slightly before playing.");
-                // Add a small delay before trying to play
-                setTimeout(function() {
-                    console.log("Attempting to play video via player.play() after delay.");
-                    var playPromise = player.play(); 
-                    if (playPromise !== undefined) {
-                        playPromise.then(_ => {
-                            console.log("Playback started via player.play() after ad and delay");
-                        }).catch(error => {
-                            console.error("Playback failed via player.play() after ad and delay:", error);
-                            // Attempt fallback to native element play?
-                            // videoElement.play().catch(e => console.error("Native play failed too:", e));
-                        });
-                    }
-                }, 100); // 100ms delay
-            });
-            
-            // Add other event listeners for debugging
-            player.on('ready', function() {
-                 console.log("Player is ready.");
-            });
+            // Basic event listeners for debugging
+            player.on('ready', function() { console.log("Player is ready."); });
             player.on('playing', function() { console.log("Video playback started/resumed."); });
             player.on('pause', function() { console.log("Video is paused."); });
             player.on('ended', function() { console.log("Video ended."); });
-            player.on('error', function(err) { console.error("Player error occurred:", err); });
+            player.on('error', function(err) { 
+                console.error("Player error occurred:", err); 
+                // Display error in the container as well
+                document.getElementById('video-container').innerHTML = `
+                    <div style="color: red; background: black; padding: 20px; text-align: center; font-size: 1.2em;">
+                        Error del reproductor: ${err.message || 'Unknown error'} (Ver consola para detalles)
+                    </div>
+                `;
+            });
 
         } else {
             console.error("Error: No video URL provided in query parameters.");
