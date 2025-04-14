@@ -43,26 +43,24 @@
     </div>
 
     <script>
-        console.log("Script started");
+        console.log("Player script started");
         const params = new URLSearchParams(window.location.search);
-        const videoUrlParam = params.get('video');
-        const defaultVideoUrl = 'https://www.googleapis.com/drive/v3/files/1iMzhbSOScFqQlwpYj3cVCkeu7DWPn6Q0?alt=media&key=AIzaSyAIpSmdpo48g_EK9kQdcuDKEYJtyqNEGAU'; // Default video
-
-        const videoUrl = videoUrlParam || defaultVideoUrl;
-        console.log("Video URL to use:", videoUrl);
+        const videoUrl = params.get('video'); // URL should be decoded automatically by get()
+        
+        console.log("Received video URL param:", videoUrl);
 
         if (videoUrl) {
             const videoElement = document.getElementById("video-player");
             
             // Set the source *before* initializing the player
             videoElement.setAttribute("src", videoUrl);
-            console.log("Video source set on element");
+            console.log("Video source set on element:", videoUrl);
 
             const player = fluidPlayer("video-player", {
                 layoutControls: {
                     primaryColor: "#FF6600",
                     playButtonShowing: true,
-                    autoPlay: true, // **** Set autoPlay to true ****
+                    autoPlay: false, // Rely on adFinished event to play
                     mute: false,
                     allowTheatre: true,
                     controlBar: {
@@ -84,46 +82,48 @@
             });
             console.log("Fluid Player initialized");
 
-            // Evento para reanudar el video tras la publicidad (puede not be needed if autoplay works)
+            // Evento para reanudar el video tras la publicidad
             player.on('adFinished', function() {
-                console.log("Ad finished event triggered - attempting play if needed");
-                // Autoplay should handle this, but try playing just in case
+                console.log("Ad finished event triggered. Attempting to play video.");
+                // Explicitly call play after the ad
                 var playPromise = player.play(); 
                 if (playPromise !== undefined) {
                     playPromise.then(_ => {
-                        console.log("Playback explicitly started via player.play() after ad");
+                        console.log("Playback started via player.play() after ad");
                     }).catch(error => {
-                         // Check if the error is because it's already playing due to autoplay
-                        if (error.name === 'NotAllowedError' || error.message.includes('play() failed because the user didn't interact')) {
-                             console.warn("player.play() after ad prevented by browser policy (or already playing).");
-                        } else {
-                            console.error("Playback failed via player.play() after ad:", error);
-                        }
+                        console.error("Playback failed via player.play() after ad:", error);
+                        // Maybe the ad itself is preventing playback? 
+                        // Or maybe browser needs another interaction? Hard to say without testing.
                     });
                 }
             });
+            
+            // Add other event listeners for debugging
+            player.on('ready', function() {
+                 console.log("Player is ready.");
+            });
 
             player.on('playing', function() {
-                console.log("Video is playing");
+                console.log("Video playback started/resumed.");
             });
 
             player.on('pause', function() {
-                console.log("Video is paused");
+                console.log("Video is paused.");
             });
 
             player.on('ended', function() {
-                console.log("Video ended");
+                console.log("Video ended.");
             });
 
             player.on('error', function(err) {
-                console.error("Player error:", err);
+                console.error("Player error occurred:", err);
             });
 
         } else {
-            console.error("No video URL provided");
+            console.error("Error: No video URL provided in query parameters.");
             document.getElementById('video-container').innerHTML = `
                 <div style="color: white; text-align: center; font-size: 1.5em;">
-                    Error: No se proporcionó una URL de video. Usa el parámetro "video" en la URL.
+                    Error: No se proporcionó una URL de video válida en los parámetros.
                 </div>
             `;
         }
