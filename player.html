@@ -37,23 +37,32 @@
 <body>
     <div id="video-container">
         <video id="video-player" playsinline controls>
+            <!-- The source will be set dynamically -->
             Tu navegador no soporta el elemento de video.
         </video>
     </div>
 
     <script>
+        console.log("Script started");
         const params = new URLSearchParams(window.location.search);
         const videoUrlParam = params.get('video');
-        const defaultVideoUrl = 'https://www.googleapis.com/drive/v3/files/1iMzhbSOScFqQlwpYj3cVCkeu7DWPn6Q0?alt=media&key=AIzaSyAIpSmdpo48g_EK9kQdcuDKEYJtyqNEGAU';
+        const defaultVideoUrl = 'https://www.googleapis.com/drive/v3/files/1iMzhbSOScFqQlwpYj3cVCkeu7DWPn6Q0?alt=media&key=AIzaSyAIpSmdpo48g_EK9kQdcuDKEYJtyqNEGAU'; // Default video
 
         const videoUrl = videoUrlParam || defaultVideoUrl;
+        console.log("Video URL to use:", videoUrl);
 
         if (videoUrl) {
+            const videoElement = document.getElementById("video-player");
+            
+            // Set the source *before* initializing the player
+            videoElement.setAttribute("src", videoUrl);
+            console.log("Video source set on element");
+
             const player = fluidPlayer("video-player", {
                 layoutControls: {
                     primaryColor: "#FF6600",
                     playButtonShowing: true,
-                    autoPlay: false,
+                    autoPlay: false, // Autoplay handled by ad logic potentially
                     mute: false,
                     allowTheatre: true,
                     controlBar: {
@@ -73,14 +82,41 @@
                     adCTAText: "Más información"
                 }
             });
+            console.log("Fluid Player initialized");
 
-            document.getElementById("video-player").setAttribute("src", videoUrl);
-
-            // Evento para reanudar el video tras la publicidad
+            // Evento para reanudar el video tras la publicidad usando la API del player
             player.on('adFinished', function() {
-                document.getElementById("video-player").play();
+                console.log("Ad finished event triggered");
+                // Use player's play method
+                var playPromise = player.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(_ => {
+                        console.log("Playback started via player.play()");
+                    }).catch(error => {
+                        console.error("Playback failed via player.play():", error);
+                        // Fallback or further error handling
+                    });
+                }
             });
+
+            player.on('playing', function() {
+                console.log("Video is playing");
+            });
+
+            player.on('pause', function() {
+                console.log("Video is paused");
+            });
+
+            player.on('ended', function() {
+                console.log("Video ended");
+            });
+
+            player.on('error', function(err) {
+                console.error("Player error:", err);
+            });
+
         } else {
+            console.error("No video URL provided");
             document.getElementById('video-container').innerHTML = `
                 <div style="color: white; text-align: center; font-size: 1.5em;">
                     Error: No se proporcionó una URL de video. Usa el parámetro "video" en la URL.
