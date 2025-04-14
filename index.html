@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Iframe para Reproductor</title>
+    <title>Generador de Iframe</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -31,7 +31,8 @@
     <div class="iframe-preview" id="iframe-preview"></div>
 
     <script>
-        const gDriveApikey = "AIzaSyAIpSmdpo48g_EK9kQdcuDKEYJtyqNEGAU";
+        // WARNING: Exposing API keys client-side is a security risk.
+        const gDriveApikey = "AIzaSyAIpSmdpo48g_EK9kQdcuDKEYJtyqNEGAU"; 
 
         function isValidUrl(url) {
             try { return new URL(url); } catch (e) { return false; }
@@ -43,51 +44,72 @@
         }
 
         async function getGoogleDriveFileUrl(fileId) {
+            // Construct the direct media link URL
             const apiUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${gDriveApikey}`;
-            try {
-                const response = await fetch(apiUrl);
-                if (!response.ok) throw new Error("Error al acceder al archivo. Asegúrate de que sea público.");
-                return apiUrl;
-            } catch (error) { alert(error.message); return null; }
+            // We don't need to fetch here, the player will use this URL directly.
+            // Basic validation to ensure it looks like a potential ID
+            if (!fileId || fileId.length < 10) { 
+                alert("ID de Google Drive inválido.");
+                return null; 
+            }
+            // Return the constructed URL for the player
+            return apiUrl; 
         }
 
         async function generateIframe() {
+            console.log("Generating iframe...");
             const service = document.getElementById('service').value;
             const videoInput = document.getElementById('video-id').value.trim();
             const posterUrl = document.getElementById('poster-url').value.trim();
 
             let videoUrl;
 
-            if (service === "direct") {
-                videoUrl = videoInput;
-            } else if (service === "pixeldrain") {
-                videoUrl = `https://pixeldrain.com/api/file/${videoInput}`;
-            } else if (service === "googledrive") {
-                const fileId = videoInput.startsWith("https://drive.google.com") 
-                    ? extractGoogleDriveId(videoInput) 
-                    : videoInput;
-                videoUrl = await getGoogleDriveFileUrl(fileId);
-            }
+            try {
+                if (service === "direct") {
+                    if (!isValidUrl(videoInput)) throw new Error("URL directa inválida.");
+                    videoUrl = videoInput;
+                } else if (service === "pixeldrain") {
+                    // Assuming Pixeldrain link structure
+                    videoUrl = `https://pixeldrain.com/api/file/${videoInput}`; 
+                } else if (service === "googledrive") {
+                    const fileId = videoInput.startsWith("https://drive.google.com") 
+                        ? extractGoogleDriveId(videoInput) 
+                        : videoInput;
+                    
+                    if (!fileId) throw new Error("No se pudo extraer el ID de Google Drive.");
+                    
+                    // Get the API URL directly
+                    videoUrl = await getGoogleDriveFileUrl(fileId);
+                    if (!videoUrl) throw new Error("No se pudo construir la URL de Google Drive.");
 
-            if (!videoUrl) {
-                alert("Por favor, ingresa un ID/URL válido.");
+                } else {
+                    throw new Error("Servicio no reconocido.");
+                }
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+                console.error("Error generating video URL:", error);
                 return;
             }
 
-            const iframeParams = new URLSearchParams({
-                video: videoUrl,
-                poster: posterUrl
-            });
+            console.log("Video URL determined:", videoUrl);
 
-            // URL de GitHub Pages de tu repositorio reproductor
-            const iframeSrc = `https://ferwiii1010.github.io/reproductor/player.html?${iframeParams.toString()}`;
+            const iframeParams = new URLSearchParams();
+            iframeParams.set('video', videoUrl);
+            if (posterUrl) {
+                iframeParams.set('poster', posterUrl);
+            }
+
+            // Use relative path for player.html
+            const iframeSrc = `./player.html?${iframeParams.toString()}`; 
+            console.log("Iframe src:", iframeSrc);
 
             document.getElementById('iframe-preview').innerHTML = `
                 <h2>Iframe Generado:</h2>
-                <textarea rows="4" style="width: 100%;">${`<iframe src="${iframeSrc}" width="800" height="450" frameborder="0" allowfullscreen></iframe>`}</textarea>
+                <textarea rows="4" style="width: 100%;" readonly>${`<iframe src="${iframeSrc}" width="800" height="450" frameborder="0" allowfullscreen></iframe>`}</textarea>
                 <h3>Vista Previa:</h3>
                 <iframe src="${iframeSrc}" width="800" height="450" frameborder="0" allowfullscreen></iframe>
             `;
+             console.log("Iframe preview updated.");
         }
     </script>
 </body>
