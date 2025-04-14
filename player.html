@@ -40,52 +40,43 @@
     </div>
 
     <script>
-        // Parsea parámetros de la URL
+        // Obtener parámetros de URL o usar valores por defecto
         const params = new URLSearchParams(window.location.search);
-        // Valores por defecto
         const defaultVideo = 'https://www.googleapis.com/drive/v3/files/1iMzhbSOScFqQlwpYj3cVCkeu7DWPn6Q0?alt=media&key=AIzaSyAIpSmdpo48g_EK9kQdcuDKEYJtyqNEGAU';
         const defaultPoster = '';
-        // Usa parámetros o valores por defecto
         const videoUrl = params.get('video') || defaultVideo;
         const posterUrl = params.get('poster') || defaultPoster;
 
-        if (videoUrl) {
-            // 1) Asignar la fuente (y póster) antes de inicializar Fluid Player
-            const videoEl = document.getElementById('video-player');
-            videoEl.setAttribute('src', videoUrl);
-            if (posterUrl) {
-                videoEl.setAttribute('poster', posterUrl);
-            }
-            // 2) Inicializar Fluid Player con la configuración de anuncios
-            fluidPlayer('video-player', {
-                layoutControls: {
-                    primaryColor: '#FF6600',
-                    playButtonShowing: true,
-                    autoPlay: false,
-                    mute: false,
-                    allowTheatre: true,
-                    controlBar: { autoHide: true }
-                },
-                vastOptions: {
-                    adList: [
-                        {
-                            roll: 'preRoll',
-                            vastTag: 'https://thusizulu.com/d.maFqzwdDGyNkvEZrG/UO/Re/md9YuiZMUplokQPVTwYox/NczUM_3LMpzaANtCN/jdEk3mMazec/ztM/SIZis/aGW/1/pZd/D/0kxF'
-                        }
-                    ],
-                    skipButtonCaption: 'Saltar en [[seconds]] segundos',
-                    skipButtonClickCaption: 'Saltar ahora',
-                    adText: 'Publicidad',
-                    adCTAText: 'Más información'
-                }
-            });
-        } else {
-            document.getElementById('video-container').innerHTML = `
-                <div style="color: white; text-align: center; font-size: 1.5em;">
-                    Error: No se proporcionó una URL de video. Usa el parámetro "video" en la URL.
-                </div>
-            `;
+        // Asignar fuente y póster antes de inicializar Fluid Player
+        const videoEl = document.getElementById('video-player');
+        videoEl.setAttribute('src', videoUrl);
+        if (posterUrl) {
+            videoEl.setAttribute('poster', posterUrl);
         }
+
+        // Inicializar Fluid Player con configuración de anuncios VAST
+        fluidPlayer('video-player', {
+            layoutControls: {
+                primaryColor: '#FF6600',
+                playButtonShowing: true,
+                autoPlay: false,
+                mute: false,
+                allowTheatre: true,
+                controlBar: { autoHide: true }
+            },
+            vastOptions: {
+                adList: [
+                    {
+                        roll: 'preRoll',
+                        vastTag: 'https://thusizulu.com/d.maFqzwdDGyNkvEZrG/UO/Re/md9YuiZMUplokQPVTwYox/NczUM_3LMpzaANtCN/jdEk3mMazec/ztM/SIZis/aGW/1/pZd/D/0kxF'
+                    }
+                ],
+                skipButtonCaption: 'Saltar en [[seconds]] segundos',
+                skipButtonClickCaption: 'Saltar ahora',
+                adText: 'Publicidad',
+                adCTAText: 'Más información'
+            }
+        });
     </script>
 </body>
 </html>
